@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 class EditableInput extends Component {
 	onChange = ({ currentTarget }) => {
@@ -57,4 +59,12 @@ export default EditableInput;
 
 export function booleanTransformerToString(value) {
 	return value ? "ATTIVO" : "NON ATTIVO";
+}
+
+export function booleanTransformerToIcon(value) {
+	return (
+		<span style={{ color: value ? "green" : "red" }}>
+			<FontAwesomeIcon icon={value ? faCheck : faTimes} />
+		</span>
+	);
 }

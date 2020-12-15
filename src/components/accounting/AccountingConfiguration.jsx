@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import accountingApi from "../../services/accountingApi";
 import EditableInput, {
 	booleanTransformerToString,
+	booleanTransformerToIcon,
 } from "./../common/editableInput";
 import Select, { BooleanSelect } from "../common/select";
 import Button, {
@@ -9,7 +10,7 @@ import Button, {
 	CancelButton,
 	IconButton,
 } from "../common/buttons";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 class AccountingConfigurationFrame extends Component {
@@ -82,7 +83,7 @@ class AccountingConfigurationFrame extends Component {
 
 	startImport = async () => {
 		this.setState({ importing: true });
-		console.log("Import started");
+		toast.info("Job avviato");
 		try {
 			await accountingApi.runAccountingJob([this.getFirm().id]);
 			toast.success("Job completato");
@@ -99,6 +100,199 @@ class AccountingConfigurationFrame extends Component {
 		const { edit } = this.state;
 		var accounts = this.mapAccountsForSelect();
 		return (
+			<div className="container">
+				<div className="row justify-content-end">
+					<div className="col-2">
+						{!edit ? (
+							<div>
+								<IconButton
+									icon={faEdit}
+									classes="btn-success"
+									onClick={this.setEditMode}
+								/>
+							</div>
+						) : (
+							<span />
+						)}
+					</div>
+				</div>
+				<div className="row">
+					<h3>Agenzia delle Entrate</h3>
+				</div>
+				<div className="row">
+					<div className="col">
+						{this.createEditableField(
+							"Stato attivazione",
+							"enabled",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("enabled")
+						)}
+					</div>
+					<div className="col">
+						<label>
+							Account
+							{this.createSelect(
+								"adeAccount",
+								accounts,
+								edit,
+								true
+							)}
+						</label>
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Usa Partita IVA",
+							"useVatNumber",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("useVatNumber")
+						)}
+					</div>
+				</div>
+				<div className="row">
+					<h3>Fatture</h3>
+				</div>
+				<div className="row">
+					<h5>Dettagli fatture</h5>
+				</div>
+				<div className="row">
+					<div className="col">
+						{this.createEditableField(
+							"Fatture emesse",
+							"invoiceGetSent",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("invoiceGetSent")
+						)}
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Fatture ricevute",
+							"invoiceGetReceived",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("invoiceGetReceived")
+						)}
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Fatture non consegnate",
+							"invoiceGetMissed",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("invoiceGetMissed")
+						)}
+					</div>
+				</div>
+
+				<div className="row">
+					<h5>Download fatture</h5>
+				</div>
+				<div className="row">
+					<div className="col">
+						{this.createEditableField(
+							"Fatture emesse",
+							"invoiceDownloadSent",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() =>
+								this.createBooleanSelect("invoiceDownloadSent")
+						)}
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Fatture ricevute",
+							"invoiceDownloadReceived",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() =>
+								this.createBooleanSelect(
+									"invoiceDownloadReceived"
+								)
+						)}
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Fatture non consegnate",
+							"invoiceDownloadMissed",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() =>
+								this.createBooleanSelect(
+									"invoiceDownloadMissed"
+								)
+						)}
+					</div>
+				</div>
+
+				<div className="row">
+					<h3>Altro</h3>
+				</div>
+
+				<div className="row">
+					<div className="col">
+						{this.createEditableField(
+							"Corrispettivi",
+							"feeEnabled",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("feeEnabled")
+						)}
+					</div>
+					<div className="col">
+						{this.createEditableField(
+							"Bollo",
+							"bolloEnabled",
+							edit,
+							booleanTransformerToIcon,
+							undefined,
+							() => this.createBooleanSelect("bolloEnabled")
+						)}
+					</div>
+					<div className="col"></div>
+				</div>
+				<div className="row justify-content-center">
+					<div className="col-2">
+						{edit ? (
+							<div>
+								<ConfirmButton
+									text="Salva"
+									action={() => this.exitEditMode(true)}
+								/>
+								<span>&nbsp;</span>
+								<CancelButton
+									text="Annulla"
+									action={() => this.exitEditMode(false)}
+								/>
+							</div>
+						) : (
+							<IconButton
+								icon={faPlay}
+								text="Avvia import"
+								classes="btn-success"
+								onClick={this.startImport}
+							/>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	createPage2() {
+		const { edit } = this.state;
+		var accounts = this.mapAccountsForSelect();
+		return (
 			<div>
 				{edit ? (
 					<div>
@@ -112,26 +306,13 @@ class AccountingConfigurationFrame extends Component {
 						/>
 					</div>
 				) : (
-					<div>
-						<Button
-							classes="btn-primary"
-							content="Modifica"
-							onClick={this.setEditMode}
-						/>
-					</div>
-				)}
-				{this.createEditableField(
-					"Stato attivazione",
-					"enabled",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("enabled")
+					<div></div>
 				)}
 				{!edit ? (
 					<label>
 						<IconButton
 							icon={faPlay}
+							text="Avvia import"
 							classes="btn-success"
 							onClick={this.startImport}
 						/>
@@ -139,72 +320,11 @@ class AccountingConfigurationFrame extends Component {
 				) : (
 					<span />
 				)}
-				<h3>Agenzia delle Entrate</h3>
-				{
-					<label>
-						Account
-						{this.createSelect("adeAccount", accounts, edit, true)}
-					</label>
-				}
-				{this.createEditableField(
-					"Usa Partita IVA",
-					"useVatNumber",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("useVatNumber")
-				)}
 				<h3>Fatture</h3>
 				<h5>Dettagli fatture</h5>
-				{this.createEditableField(
-					"Fatture emesse",
-					"invoiceGetSent",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceGetSent")
-				)}
-				{this.createEditableField(
-					"Fatture ricevute",
-					"invoiceGetReceived",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceGetReceived")
-				)}
-				{this.createEditableField(
-					"Fatture non consegnate",
-					"invoiceGetMissed",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceGetMissed")
-				)}
+
 				<h5>Download file</h5>
-				{this.createEditableField(
-					"Fatture emesse",
-					"invoiceDownloadSent",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceDownloadSent")
-				)}
-				{this.createEditableField(
-					"Fatture ricevute",
-					"invoiceDownloadReceived",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceDownloadReceived")
-				)}
-				{this.createEditableField(
-					"Fatture non consegnate",
-					"invoiceDownloadMissed",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("invoiceDownloadMissed")
-				)}
+
 				<h3>Corrispettivi</h3>
 				{this.createEditableField(
 					"Stato",

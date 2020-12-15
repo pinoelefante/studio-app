@@ -46,9 +46,11 @@ export const OpenFirmButton = ({ firm, ...rest }) => {
 	return <GoButton useLink={true} href={href} {...rest} />;
 };
 
-export const IconButton = ({ icon, onClick, ...rest }) => {
+export const IconButton = ({ icon, text, onClick, ...rest }) => {
 	const content = <FontAwesomeIcon icon={icon} />;
-	return <Button content={content} onClick={onClick} {...rest} />;
+	return (
+		<Button content={content} content2={text} onClick={onClick} {...rest} />
+	);
 };
 
 export const GoButton = ({ onClick, ...rest }) => {
@@ -66,6 +68,7 @@ class Button extends Component {
 	render() {
 		const {
 			content,
+			content2,
 			useLink,
 			href,
 			onClick,
@@ -78,7 +81,7 @@ class Button extends Component {
 				onClick={onClick}
 				title={tooltip}
 			>
-				{content}
+				{content} {content2}
 			</button>
 		);
 		if (useLink && href) {
