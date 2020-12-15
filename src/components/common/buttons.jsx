@@ -1,0 +1,94 @@
+import React, { Component } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+	faFileDownload,
+	faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
+
+export const DownloadButton = ({ link, ...rest }) => {
+	const content = <FontAwesomeIcon icon={faFileDownload} />;
+	return (
+		<Button
+			href={link}
+			content={content}
+			classes="btn-success"
+			tooltip="Scarica"
+			{...rest}
+		/>
+	);
+};
+
+export const ConfirmButton = ({ text, action, ...rest }) => {
+	return (
+		<Button
+			classes="btn-success"
+			content={text}
+			onClick={action}
+			{...rest}
+		/>
+	);
+};
+
+export const CancelButton = ({ text, action, ...rest }) => {
+	return (
+		<Button
+			classes="btn-danger"
+			content={text}
+			onClick={action}
+			{...rest}
+		/>
+	);
+};
+
+export const OpenFirmButton = ({ firm, ...rest }) => {
+	const href = "/firm/" + firm.id;
+	return <GoButton useLink={true} href={href} {...rest} />;
+};
+
+export const IconButton = ({ icon, onClick, ...rest }) => {
+	const content = <FontAwesomeIcon icon={icon} />;
+	return <Button content={content} onClick={onClick} {...rest} />;
+};
+
+export const GoButton = ({ onClick, ...rest }) => {
+	return (
+		<IconButton
+			classes="btn-success"
+			icon={faArrowRight}
+			onClick={onClick}
+			{...rest}
+		/>
+	);
+};
+
+class Button extends Component {
+	render() {
+		const {
+			content,
+			useLink,
+			href,
+			onClick,
+			classes,
+			tooltip,
+		} = this.props;
+		const btn = (
+			<button
+				className={"btn" + (classes ? " " + classes : "")}
+				onClick={onClick}
+				title={tooltip}
+			>
+				{content}
+			</button>
+		);
+		if (useLink && href) {
+			return <Link to={href}>{btn}</Link>;
+		}
+		if (href) {
+			return <a href={href}>{btn}</a>;
+		}
+		return btn;
+	}
+}
+
+export default Button;
