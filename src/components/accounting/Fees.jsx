@@ -1,86 +1,31 @@
 import React, { Component } from "react";
 import accountingApi from "../../services/accountingApi";
-import firmApi from "../../services/firmApi";
 import MonthSelector from "../common/monthSelector";
 import YearSelector from "../common/yearSelector";
 import Select from "../common/select";
+import { IconButton } from "../common/buttons";
 import _ from "lodash";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import ItalianDateRenderer from "../common/date";
 
 class FeesFrame extends Component {
-	state = {
-		fees: null,
-		places: null,
-		selectedPlaceId: null,
-		year: new Date().getFullYear(),
-		month: new Date().getMonth() + 1,
-	};
-
-	async componentDidMount() {
-		let { year, month, selectedPlaceId } = this.state;
-		let { fees } = this.state;
-		// load places
-		const places = await this.loadPlaces();
-		// load fees
-		if (fees === null) {
-			fees = await this.loadFees(year, month);
-		}
-		if (places && places.length > 0) {
-			selectedPlaceId = places[0].id;
-		}
-		this.setState({ fees, places, selectedPlaceId });
-	}
-
 	render() {
-		const { fees } = this.state;
-		if (fees === null) {
-			return "Caricamento in corso";
-		} else if (fees.length > 0) {
-			return this.populateTable(fees);
-		} else {
-			return "Non ci sono corrispettivi";
-		}
-	}
-
-	getFirm = () => {
-		return this.props.firm;
-	};
-
-	async loadPlaces() {
-		const firm = this.getFirm();
-		const { data } = await firmApi.getFirmPlaces(firm.id);
-		return data;
-	}
-
-	async loadFees(year, month) {
-		const firm = this.getFirm();
-		if (!firm) return;
-		const { data: fees } = await accountingApi.getFees(
-			year,
-			month,
-			true,
-			false,
-			firm.id
-		);
-		return fees;
+		return this.populateTable();
 	}
 
 	onYearChanged = async (newYear) => {
-		const { month } = this.state;
-		const fees = await this.loadFees(newYear, month);
-		this.setState({ year: newYear, fees });
+		const { month, onPeriodChanged } = this.props;
+		onPeriodChanged(newYear, month);
 	};
 
 	onMonthChanged = async (newMonth) => {
-		const { year } = this.state;
-		const fees = await this.loadFees(year, newMonth);
-		this.setState({ month: newMonth, fees });
+		const { year, onPeriodChanged } = this.props;
+		onPeriodChanged(year, newMonth);
 	};
 
 	onPlaceChanged = (placeId) => {
-		this.setState({ selectedPlaceId: parseInt(placeId) });
+		const { onPlaceChanged } = this.props;
+		onPlaceChanged(parseInt(placeId));
 	};
 
 	createPlaceValues(places) {
@@ -108,7 +53,6 @@ class FeesFrame extends Component {
 			);
 		}
 		const { details, total } = fees;
-		console.log("Fee details", details);
 		return (
 			<div>
 				<p>
@@ -144,13 +88,12 @@ class FeesFrame extends Component {
 		);
 	}
 
-	populateTable(fees) {
+	populateTable() {
+		const { fees, places, selectedPlaceId, year, month, firm } = this.props;
 		if (!fees) {
 			// SHOW RELOAD BUTTON
-			return <span />;
+			return <span>Non ci sono corrispettivi</span>;
 		}
-		const { places, selectedPlaceId, year, month } = this.state;
-		const firm = this.getFirm();
 		const assigned = _.find(fees, (f) => f.placeId === selectedPlaceId);
 		const unassigned = _.filter(fees, (f) => f.id === null);
 		const currentYear = new Date().getFullYear();
@@ -215,23 +158,24 @@ class FeesFrame extends Component {
 	}
 
 	createDownloadButton(assigned, unassigned, year, month, firm) {
-		if (this.hasFeeDetails(assigned) || this.hasFeeDetails(unassigned))
+		if (this.hasFeeDetails(assigned) || this.hasFeeDetails(unassigned)) {
+			const link = accountingApi.getFirmFeeDownload(
+				year,
+				month,
+				true,
+				firm.id
+			);
 			return (
 				<div style={{ marginTop: "10px" }}>
-					<a
-						href={accountingApi.getFirmFeeDownload(
-							year,
-							month,
-							firm.id
-						)}
-					>
-						<button className="btn btn-primary">
-							<FontAwesomeIcon icon={faDownload} />
-							Scarica PDF
-						</button>
-					</a>
+					<IconButton
+						icon={faDownload}
+						text="Scarica PDF"
+						href={link}
+						classes="btn-primary"
+					/>
 				</div>
 			);
+		}
 		return <span />;
 	}
 }

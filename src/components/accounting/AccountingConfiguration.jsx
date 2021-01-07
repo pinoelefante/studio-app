@@ -1,15 +1,10 @@
 import React, { Component } from "react";
 import accountingApi from "../../services/accountingApi";
 import EditableInput, {
-	booleanTransformerToString,
 	booleanTransformerToIcon,
 } from "./../common/editableInput";
 import Select, { BooleanSelect } from "../common/select";
-import Button, {
-	ConfirmButton,
-	CancelButton,
-	IconButton,
-} from "../common/buttons";
+import { ConfirmButton, CancelButton, IconButton } from "../common/buttons";
 import { faPlay, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -82,11 +77,15 @@ class AccountingConfigurationFrame extends Component {
 	};
 
 	startImport = async () => {
+		const { onImportComplete } = this.props;
 		this.setState({ importing: true });
 		toast.info("Job avviato");
 		try {
 			await accountingApi.runAccountingJob([this.getFirm().id]);
 			toast.success("Job completato");
+			if (onImportComplete) {
+				onImportComplete();
+			}
 		} catch {
 			toast.error(
 				"Si è verificato un errore durante l'esecuzione del job"
@@ -97,7 +96,7 @@ class AccountingConfigurationFrame extends Component {
 	};
 
 	createPage() {
-		const { edit } = this.state;
+		const { edit, importing } = this.state;
 		var accounts = this.mapAccountsForSelect();
 		return (
 			<div className="container">
@@ -281,68 +280,11 @@ class AccountingConfigurationFrame extends Component {
 								text="Avvia import"
 								classes="btn-success"
 								onClick={this.startImport}
+								disabled={importing}
 							/>
 						)}
 					</div>
 				</div>
-			</div>
-		);
-	}
-
-	createPage2() {
-		const { edit } = this.state;
-		var accounts = this.mapAccountsForSelect();
-		return (
-			<div>
-				{edit ? (
-					<div>
-						<ConfirmButton
-							text="Salva"
-							action={() => this.exitEditMode(true)}
-						/>
-						<CancelButton
-							text="Annulla"
-							action={() => this.exitEditMode(false)}
-						/>
-					</div>
-				) : (
-					<div></div>
-				)}
-				{!edit ? (
-					<label>
-						<IconButton
-							icon={faPlay}
-							text="Avvia import"
-							classes="btn-success"
-							onClick={this.startImport}
-						/>
-					</label>
-				) : (
-					<span />
-				)}
-				<h3>Fatture</h3>
-				<h5>Dettagli fatture</h5>
-
-				<h5>Download file</h5>
-
-				<h3>Corrispettivi</h3>
-				{this.createEditableField(
-					"Stato",
-					"feeEnabled",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("feeEnabled")
-				)}
-				<h3>Bollo</h3>
-				{this.createEditableField(
-					"Stato",
-					"bolloEnabled",
-					edit,
-					booleanTransformerToString,
-					undefined,
-					() => this.createBooleanSelect("bolloEnabled")
-				)}
 			</div>
 		);
 	}

@@ -26,7 +26,7 @@ class FirmList extends Component {
 				data={firms}
 				columns={this.columns}
 				keyFields={["fiscalCode", "vatNumber"]}
-				itemsPerPage={15}
+				itemsPerPage={12}
 			/>
 		);
 	}

@@ -74,12 +74,14 @@ class Button extends Component {
 			onClick,
 			classes,
 			tooltip,
+			...other
 		} = this.props;
 		const btn = (
 			<button
 				className={"btn" + (classes ? " " + classes : "")}
 				onClick={onClick}
 				title={tooltip}
+				{...other}
 			>
 				{content} {content2}
 			</button>

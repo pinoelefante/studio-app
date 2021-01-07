@@ -1,20 +1,28 @@
 import React, { Component } from "react";
 import firmApi from "../services/firmApi";
+import accountingApi from "../services/accountingApi";
 import TabPanel from "./common/tabpanel";
 import InvoicesFrame from "./accounting/Invoices";
 import FeesFrame from "./accounting/Fees";
 import AccountingConfigurationFrame from "./accounting/AccountingConfiguration";
 
 class FirmPage extends Component {
-	state = { firm: null };
+	state = {
+		firm: null,
+		firmPlaces: null,
+		firmConfiguration: null,
+		fees: null,
+		feesCurrentPlace: null,
+		feesYear: null,
+		feesMonth: null,
+		invoices: null,
+		invoicesYear: null,
+		invoicesMonth: null,
+		invoiceType: null,
+	};
 
 	async componentDidMount() {
-		const { id } = this.props.match.params;
-		const { firm } = this.state;
-		if (firm === null) {
-			const firmData = await this.loadFirm(id);
-			this.setState({ firm: firmData });
-		}
+		await this.reload();
 	}
 
 	render() {
@@ -22,25 +30,7 @@ class FirmPage extends Component {
 		if (!firm) {
 			return "Loading firm";
 		}
-		const tabs = [
-			{
-				id: "invoice",
-				content: <InvoicesFrame firm={firm} />,
-				label: "Fatture",
-				main: true,
-			},
-			{
-				id: "fee",
-				content: <FeesFrame firm={firm} />,
-				label: "Corrispettivi",
-			},
-			{
-				id: "accounting-conf",
-				content: <AccountingConfigurationFrame firm={firm} />,
-				label: "Configurazione",
-			},
-			// { id: "contact", content: "Contatti", label: "Contatti" },
-		];
+		const tabs = this.createTabs();
 		return (
 			<div>
 				<h3>
@@ -51,9 +41,196 @@ class FirmPage extends Component {
 		);
 	}
 
+	createTabs() {
+		const { firm, firmConfiguration } = this.state;
+		const tabs = [];
+		const {
+			invoiceGetSent,
+			invoiceGetReceived,
+			invoiceGetMissed,
+		} = firmConfiguration;
+
+		if (invoiceGetSent || invoiceGetReceived || invoiceGetMissed) {
+			const {
+				invoices,
+				invoiceType,
+				invoicesYear,
+				invoicesMonth,
+			} = this.state;
+			tabs.push({
+				id: "invoice",
+				content: (
+					<InvoicesFrame
+						firm={firm}
+						onPeriodChanged={(year, month) =>
+							this.onInvoicePeriodChanged(year, month)
+						}
+						onTypeChanged={(type) =>
+							this.onInvoiceTypeChanged(type)
+						}
+						invoices={invoices}
+						invoiceType={invoiceType}
+						year={invoicesYear}
+						month={invoicesMonth}
+					/>
+				),
+				label: "Fatture",
+				main: true,
+			});
+		}
+
+		if (firmConfiguration.feeEnabled) {
+			tabs.push({
+				id: "fee",
+				content: (
+					<FeesFrame
+						firm={firm}
+						fees={this.state.fees}
+						places={this.state.firmPlaces}
+						selectedPlaceId={this.state.feesCurrentPlace}
+						year={this.state.feesYear}
+						month={this.state.feesMonth}
+						onPeriodChanged={(year, month) =>
+							this.onFeePeriodChanged(year, month)
+						}
+						onPlaceChanged={(newPlace) =>
+							this.setState({ feesCurrentPlace: newPlace })
+						}
+					/>
+				),
+				label: "Corrispettivi",
+				main: tabs.length === 0,
+			});
+		}
+
+		tabs.push({
+			id: "accounting-conf",
+			content: (
+				<AccountingConfigurationFrame
+					firm={firm}
+					onImportComplete={this.onImportJobComplete}
+				/>
+			),
+			label: "Configurazione",
+			main: tabs.length === 0,
+		});
+
+		return tabs;
+	}
+
 	async loadFirm(id) {
 		const { data: firm } = await firmApi.getFirm(id);
 		return firm;
+	}
+
+	async loadPlaces(firm) {
+		const { data } = await firmApi.getFirmPlaces(firm.id);
+		return data;
+	}
+
+	async loadConfiguration(firm) {
+		const { data } = await accountingApi.getAccountingConfiguration(
+			firm.id
+		);
+		return data;
+	}
+
+	async loadFees(year, month, firm = undefined) {
+		if (!firm) {
+			firm = this.state.firm;
+		}
+		const { data: fees } = await accountingApi.getFees(
+			year,
+			month,
+			true,
+			false,
+			firm.id
+		);
+		return fees;
+	}
+
+	onFeePeriodChanged = async (newYear, newMonth) => {
+		const fees = await this.loadFees(newYear, newMonth);
+		this.setState({ feesYear: newYear, feesMonth: newMonth, fees });
+	};
+
+	onPlaceChanged = (newPlace) => {
+		this.setState({ feesCurrentPlace: newPlace });
+	};
+
+	async loadInvoices(year, month, type = "sent", firm = undefined) {
+		if (!firm) {
+			firm = this.state.firm;
+		}
+		const { data } = await accountingApi.getInvoice(
+			firm.id,
+			year,
+			month,
+			type === "sent"
+		);
+		return data;
+	}
+
+	onInvoicePeriodChanged = async (year, month) => {
+		const { invoiceType, firm } = this.state;
+		const invoices = await this.loadInvoices(
+			year,
+			month,
+			invoiceType,
+			firm
+		);
+		this.setState({ invoices, invoicesYear: year, invoicesMonth: month });
+	};
+
+	onInvoiceTypeChanged = async (invoiceType) => {
+		const { invoicesYear, invoicesMonth, firm } = this.state;
+		const invoices = await this.loadInvoices(
+			invoicesYear,
+			invoicesMonth,
+			invoiceType,
+			firm
+		);
+		this.setState({ invoices, invoiceType });
+	};
+
+	onImportJobComplete = async () => {
+		console.log("Import job complete callback");
+		await this.reload();
+	};
+
+	async reload() {
+		const { id: firmId } = this.props.match.params;
+
+		const firmData = await this.loadFirm(firmId);
+		const places = await this.loadPlaces(firmData);
+		const selectedPlaceId = places.length > 0 ? places[0].id : null;
+		const firmConfig = await this.loadConfiguration(firmData);
+		const feesYear = new Date().getFullYear();
+		const feesMonth = new Date().getMonth() + 1;
+		const fees = await this.loadFees(feesYear, feesMonth, firmData);
+		const invoicesYear = new Date().getFullYear();
+		const invoicesMonth = new Date().getMonth() + 1;
+		const invoiceType = "sent";
+		const invoices = await this.loadInvoices(
+			invoicesYear,
+			invoicesMonth,
+			invoiceType,
+			firmData
+		);
+
+		this.setState({
+			firm: firmData,
+			firmPlaces: places,
+			feesCurrentPlace: selectedPlaceId,
+			feesYear,
+			feesMonth,
+			firmConfiguration: firmConfig,
+			fees,
+			invoices,
+			invoicesYear,
+			invoicesMonth,
+			invoiceType,
+		});
 	}
 }
 
