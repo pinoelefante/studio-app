@@ -80,7 +80,13 @@ class InvoicesFrame extends Component {
 		return inv.documentType === "Nota di credito";
 	}
 	renderTable() {
-		const { onTypeChanged, invoiceType, invoices } = this.props;
+		const {
+			onTypeChanged,
+			invoiceType,
+			invoices,
+			year,
+			month,
+		} = this.props;
 		const sent = invoiceType === "sent";
 		const currentYear = new Date().getFullYear();
 		return (
@@ -90,15 +96,16 @@ class InvoicesFrame extends Component {
 						<tr>
 							<td>
 								<YearSelector
-									from={2020}
+									from={2019}
 									to={currentYear}
-									current={currentYear}
+									current={year}
 									onYearChanged={this.onYearChanged}
 								/>
 							</td>
 							<td>
 								<MonthSelector
 									lang="it"
+									selected={month}
 									onMonthChanged={this.onMonthChanged}
 								/>
 							</td>

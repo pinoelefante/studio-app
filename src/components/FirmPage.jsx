@@ -200,17 +200,28 @@ class FirmPage extends Component {
 
 	async reload() {
 		const { id: firmId } = this.props.match.params;
+		let {
+			invoicesYear,
+			invoicesMonth,
+			invoiceType,
+			feesYear,
+			feesMonth,
+			firm,
+			firmPlaces,
+			firmConfiguration,
+		} = this.state;
 
-		const firmData = await this.loadFirm(firmId);
-		const places = await this.loadPlaces(firmData);
+		const firmData = firm ?? (await this.loadFirm(firmId));
+		const places = firmPlaces ?? (await this.loadPlaces(firmData));
 		const selectedPlaceId = places.length > 0 ? places[0].id : null;
-		const firmConfig = await this.loadConfiguration(firmData);
-		const feesYear = new Date().getFullYear();
-		const feesMonth = new Date().getMonth() + 1;
+		const firmConfig =
+			firmConfiguration ?? (await this.loadConfiguration(firmData));
+		feesYear = feesYear ?? new Date().getFullYear();
+		feesMonth = feesMonth ?? new Date().getMonth() + 1;
 		const fees = await this.loadFees(feesYear, feesMonth, firmData);
-		const invoicesYear = new Date().getFullYear();
-		const invoicesMonth = new Date().getMonth() + 1;
-		const invoiceType = "sent";
+		invoicesYear = invoicesYear ?? new Date().getFullYear();
+		invoicesMonth = invoicesMonth ?? new Date().getMonth() + 1;
+		invoiceType = invoiceType ?? "sent";
 		const invoices = await this.loadInvoices(
 			invoicesYear,
 			invoicesMonth,
