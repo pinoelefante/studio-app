@@ -15,7 +15,6 @@ function App() {
       <div className="content" style={{padding:"15px"}}>
       <Switch>
         <Route path="/massive-operations" component={MassOperation} />
-        <Route path="/firm/:id/:view" component={FirmPage} />
         <Route path="/firm/:id" component={FirmPage} />
         <Route path="/firm" component={FirmList} />
         <Route path="/" component={FirmList} />

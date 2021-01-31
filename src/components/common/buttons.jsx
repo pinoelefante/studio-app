@@ -9,13 +9,7 @@ import { Link } from "react-router-dom";
 export const DownloadButton = ({ link, ...rest }) => {
 	const content = <FontAwesomeIcon icon={faFileDownload} />;
 	return (
-		<Button
-			href={link}
-			content={content}
-			classes="btn-success"
-			tooltip="Scarica"
-			{...rest}
-		/>
+		<Button href={link} content={content} classes="btn-success" {...rest} />
 	);
 };
 
@@ -66,6 +60,9 @@ export const GoButton = ({ onClick, ...rest }) => {
 
 class Button extends Component {
 	render() {
+		const buttonStyle = {
+			minWidth: "50px",
+		};
 		const {
 			content,
 			content2,
@@ -78,6 +75,7 @@ class Button extends Component {
 		} = this.props;
 		const btn = (
 			<button
+				style={buttonStyle}
 				className={"btn" + (classes ? " " + classes : "")}
 				onClick={onClick}
 				title={tooltip}
@@ -90,7 +88,11 @@ class Button extends Component {
 			return <Link to={href}>{btn}</Link>;
 		}
 		if (href) {
-			return <a href={href}>{btn}</a>;
+			return (
+				<a href={href} rel="noreferrer" target="_blank">
+					{btn}
+				</a>
+			);
 		}
 		return btn;
 	}

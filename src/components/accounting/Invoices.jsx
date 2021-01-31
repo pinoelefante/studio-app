@@ -1,13 +1,19 @@
 import React, { Component } from "react";
+import _ from "lodash";
+import {
+	faInfoCircle,
+	faEye,
+	faPaperclip,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import accountingApi from "../../services/accountingApi";
 import YearSelector from "../common/yearSelector";
 import MonthSelector from "./../common/monthSelector";
 import Table from "./../common/table";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DownloadButton } from "../common/buttons";
+import { DownloadButton, IconButton } from "../common/buttons";
 import ItalianDateRenderer from "../common/date";
-import _ from "lodash";
+
+import VerticalSeparator from "../common/verticalSeparator";
 
 class InvoicesFrame extends Component {
 	columns = [
@@ -41,12 +47,48 @@ class InvoicesFrame extends Component {
 		{
 			key: "functions",
 			renderContent: (inv) => {
+				const firmId = this.props.firm.id;
+				const invoiceId = inv.invoiceId;
+				console.log(inv);
 				if (inv.hasFile) {
 					const link = accountingApi.getFirmInvoiceDownload(
-						this.props.firm.id,
-						inv.invoiceId
+						firmId,
+						invoiceId
 					);
-					return <DownloadButton link={link} />;
+					return (
+						<React.Fragment>
+							<DownloadButton tooltip="Scarica XML" link={link} />
+
+							<VerticalSeparator />
+
+							<IconButton
+								icon={faEye}
+								classes="btn-success"
+								tooltip="Visualizza"
+								href={accountingApi.getInvoiceViewUrl(
+									firmId,
+									invoiceId
+								)}
+							/>
+							{inv.hasAttachments ? (
+								<span>
+									<VerticalSeparator />
+
+									<IconButton
+										icon={faPaperclip}
+										classes="btn-success"
+										tooltip="Scarica allegati"
+										href={accountingApi.getInvoiceAttachmentsUrl(
+											firmId,
+											invoiceId
+										)}
+									/>
+								</span>
+							) : (
+								""
+							)}
+						</React.Fragment>
+					);
 				}
 				return <span></span>;
 			},
