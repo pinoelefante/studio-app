@@ -176,12 +176,10 @@ class MassOperation extends Component {
 
 	removeJournalEntry(entry) {
 		accountingApi.removeInvoiceJournal(entry).then((response) => {
-			console.log("Response", response);
 			const journal = {...this.state.journal}
 			const newJournal = _.filter(journal, (i) => i !== entry);
 			this.setState({journal: newJournal});
 		}).catch((reason) => {
-			console.log("Catch", reason)
 			toast.error(reason);
 		});
 	}

@@ -50,7 +50,6 @@ class InvoicesFrame extends Component {
 			renderContent: (inv) => {
 				const firmId = this.props.firm.id;
 				const invoiceId = inv.invoiceId;
-				console.log(inv);
 				if (inv.hasFile) {
 					const link = accountingApi.getFirmInvoiceDownload(
 						firmId,
@@ -252,7 +251,6 @@ class InvoiceViewDate extends Component {
 		const {deliveryDate, presaVisione} = invoice;
 		const date = deliveryDate === null ? (presaVisione !== null ? presaVisione : null) : deliveryDate;
 		const missing = presaVisione !== null;
-		console.log("Presa visione", missing);
 		return <p>
 			<ItalianDateRenderer date={date} />
 			{missing ? <i
