@@ -251,13 +251,13 @@ class InvoiceViewDate extends Component {
 		const {deliveryDate, presaVisione} = invoice;
 		const date = deliveryDate === null ? (presaVisione !== null ? presaVisione : null) : deliveryDate;
 		const missing = presaVisione !== null;
-		return <p>
+		return <React.Fragment>
 			<ItalianDateRenderer date={date} />
 			{missing ? <i
 				data-toogle="tooltip"
 				title="Presa visione"
 				data-placement="left"
 			>&nbsp;<FontAwesomeIcon icon={faExclamationCircle} size="sm" /></i> : ""}
-		</p>
+		</React.Fragment>
 	}
 }

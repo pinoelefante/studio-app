@@ -114,13 +114,31 @@ class Table extends Component {
 			[sortColumn.path],
 			[sortColumn.order]
 		);
-		return paginate(ordered, currentPage, itemsPerPage);
+		if (this.isValidPage(currentPage)) 
+			return paginate(ordered, currentPage, itemsPerPage);
+		else {
+			this.state.currentPage = 1;
+			return paginate(ordered, 1, itemsPerPage);
+		}
 	};
+
+	isValidPage(currentPage) {
+		const maxPages = this.getMaxPages();
+		const valid = currentPage <= maxPages
+		return valid;
+	}
+
+	getMaxPages() {
+		const { data : items } = this.props;
+		const {itemsPerPage} = this.state;
+		const itemsCount = items.length;
+		return itemsCount / itemsPerPage + (itemsCount % itemsPerPage === 0 ? 0 : 1);
+	}
 
 	render() {
 		const { data, columns, keyFields } = this.props;
-		const { sortColumn, itemsPerPage, currentPage } = this.state;
 		const items = this.getItems();
+		const { sortColumn, itemsPerPage, currentPage } = this.state;
 
 		return (
 			<React.Fragment>
