@@ -6,7 +6,7 @@ const ItalianDateRenderer = ({ date }) => {
 	const y = toDate.getFullYear();
 	const m = toDate.getMonth() + 1;
 	const d = toDate.getDate();
-	return <p>{d + "/" + m + "/" + y}</p>;
+	return <span>{d + "/" + m + "/" + y}</span>;
 };
 
 export default ItalianDateRenderer;

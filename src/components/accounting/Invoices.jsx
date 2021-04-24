@@ -4,6 +4,7 @@ import {
 	faInfoCircle,
 	faEye,
 	faPaperclip,
+	faExclamationCircle
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import accountingApi from "../../services/accountingApi";
@@ -34,10 +35,10 @@ class InvoicesFrame extends Component {
 			renderContent: (invoice) => <InvoiceTotal invoice={invoice} />,
 		},
 		{
-			path: "deliveryDate",
+			key: "deliveryDate",
 			label: "Consegna",
 			renderContent: (invoice) => (
-				<ItalianDateRenderer date={invoice.deliveryDate} />
+				<InvoiceViewDate invoice={invoice} />
 			),
 		},
 		{
@@ -242,5 +243,23 @@ class InvoiceTotal extends Component {
 		const tooltipText =
 			"Imponibile " + invoice.taxable + "  IVA " + invoice.tax;
 		return tooltipText;
+	}
+}
+
+class InvoiceViewDate extends Component {
+	render() {
+		const {invoice} = this.props;
+		const {deliveryDate, presaVisione} = invoice;
+		const date = deliveryDate === null ? (presaVisione !== null ? presaVisione : null) : deliveryDate;
+		const missing = presaVisione !== null;
+		console.log("Presa visione", missing);
+		return <p>
+			<ItalianDateRenderer date={date} />
+			{missing ? <i
+				data-toogle="tooltip"
+				title="Presa visione"
+				data-placement="left"
+			>&nbsp;<FontAwesomeIcon icon={faExclamationCircle} size="sm" /></i> : ""}
+		</p>
 	}
 }
