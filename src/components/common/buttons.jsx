@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faFileDownload,
 	faArrowRight,
+	faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -23,6 +24,14 @@ export const ConfirmButton = ({ text, action, ...rest }) => {
 		/>
 	);
 };
+
+export const DeleteButton = ({...rest}) => {
+	return <IconButton 
+				icon = {faTrash}
+				classes="btn-danger"
+				{...rest}
+		/>
+}
 
 export const CancelButton = ({ text, action, ...rest }) => {
 	return (

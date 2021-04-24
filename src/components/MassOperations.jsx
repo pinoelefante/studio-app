@@ -6,6 +6,8 @@ import Checkbox from "./common/checkbox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import { DeleteButton } from "./common/buttons";
+import _ from 'lodash'
 
 class MassOperation extends Component {
 	state = {
@@ -13,12 +15,22 @@ class MassOperation extends Component {
 		feeMonth: null,
 		feeKeepEmpty: false,
 		accountingJobRunning: false,
+		journal: null
 	};
+
+	componentDidMount() {
+		accountingApi.getInvoiceJournal().then( response => {
+			const {data} = response;
+			this.setState({journal: data });
+		});
+	}
+
 	render() {
 		return (
 			<div>
 				{this.createAccountingJobRunner()}
 				{this.createFeeExport()}
+				{this.createJournal()}
 			</div>
 		);
 	}
@@ -102,7 +114,7 @@ class MassOperation extends Component {
 		} finally {
 			this.setState({ accountingJobRunning: false });
 		}
-	};
+	}
 
 	createAccountingJobRunner() {
 		const { accountingJobRunning } = this.state;
@@ -128,6 +140,50 @@ class MassOperation extends Component {
 				</tbody>
 			</table>
 		);
+	}
+
+	createJournal() {
+		const {journal} = this.state;
+		return <React.Fragment>
+			<h4>Fatture da importare</h4>
+			{
+				journal !== null ? this.renderJournal(journal) : "Non ci sono dati da importare"
+			}
+		</React.Fragment>;
+	}
+
+	renderJournal(journal) {
+		let rowIndex = 0;
+		return (
+			<table className="table table-sm">
+				<tbody>
+				{ 
+					journal.map(journalEntry => {
+						return 	(
+						<tr key={"row_" + (rowIndex++)}>
+							<td>{journalEntry.firmId} - {journalEntry.firmName}</td>
+							<td>{journalEntry.date}</td>
+							<td>{journalEntry.count} fatture</td>
+							<td><DeleteButton onClick = {() => this.removeJournalEntry(journalEntry)}/></td>
+						</tr>
+						)
+					})
+				}
+				</tbody>
+			</table>
+		);
+	}
+
+	removeJournalEntry(entry) {
+		accountingApi.removeInvoiceJournal(entry).then((response) => {
+			console.log("Response", response);
+			const journal = {...this.state.journal}
+			const newJournal = _.filter(journal, (i) => i !== entry);
+			this.setState({journal: newJournal});
+		}).catch((reason) => {
+			console.log("Catch", reason)
+			toast.error(reason);
+		});
 	}
 }
 

@@ -35,5 +35,11 @@ export default {
     },
     getInvoiceAttachmentsUrl: (firmId, invoiceId) => {
         return createUrl(`accounting/invoice/${firmId}/${invoiceId}/attachment`);
+    },
+    getInvoiceJournal: async () => {
+        return await http.get("accounting/journal");
+    },
+    removeInvoiceJournal: async({firmId, date}) => {
+        return await http.post(`accounting/journal/${firmId}/${date}`);
     }
 }
