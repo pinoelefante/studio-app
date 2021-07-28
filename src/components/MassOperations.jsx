@@ -9,6 +9,7 @@ import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { ConfirmButton, DeleteButton } from "./common/buttons";
 import _ from 'lodash'
+import { Link } from "react-router-dom";
 
 class MassOperation extends Component {
 	state = {
@@ -182,7 +183,7 @@ class MassOperation extends Component {
 					journal.map(journalEntry => {
 						return 	(
 						<tr key={"row_" + (rowIndex++)}>
-							<td>{journalEntry.firmId} - {journalEntry.firmName}</td>
+							<td><Link to={"/firm/" + journalEntry.firmId}>{journalEntry.firmId} - {journalEntry.firmName}</Link></td>
 							<td>{journalEntry.date}</td>
 							<td>{journalEntry.count} fatture</td>
 							<td><DeleteButton onClick = {() => this.removeJournalEntry(journalEntry)}/></td>
