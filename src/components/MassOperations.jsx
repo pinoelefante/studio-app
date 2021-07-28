@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import accountingApi from "../services/accountingApi";
+import firmApi from "../services/firmApi";
 import MonthSelector from "./common/monthSelector";
 import YearSelector from "./common/yearSelector";
 import Checkbox from "./common/checkbox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { DeleteButton } from "./common/buttons";
+import { ConfirmButton, DeleteButton } from "./common/buttons";
 import _ from 'lodash'
 
 class MassOperation extends Component {
@@ -15,6 +16,7 @@ class MassOperation extends Component {
 		feeMonth: null,
 		feeKeepEmpty: false,
 		accountingJobRunning: false,
+		delegationJobRunning: false,
 		journal: null
 	};
 
@@ -28,7 +30,7 @@ class MassOperation extends Component {
 	render() {
 		return (
 			<div>
-				{this.createAccountingJobRunner()}
+				{this.createAdeJobRunner()}
 				{this.createFeeExport()}
 				{this.createJournal()}
 			</div>
@@ -116,8 +118,22 @@ class MassOperation extends Component {
 		}
 	}
 
-	createAccountingJobRunner() {
-		const { accountingJobRunning } = this.state;
+	onClickStartDelegationJob = () => {
+		this.setState({delegationJobRunning: true});
+		firmApi.updateDelegations()
+		.then(() => {
+			toast.info("Aggiornamento deleghe terminato");
+		})
+		.catch(() => {
+			toast.error("Si è verificato un errore durante l'aggiornamento delle deleghe");
+		})
+		.finally(() => {
+			this.setState({delegationJobRunning: false});
+		})
+	}
+
+	createAdeJobRunner() {
+		const { accountingJobRunning, delegationJobRunning } = this.state;
 		return (
 			<table className="table table-sm">
 				<tbody>
@@ -126,15 +142,20 @@ class MassOperation extends Component {
 							<b>Importa da Fatture e Corrispettivi</b>
 						</td>
 						<td>
-							<button
-								className="btn btn-success"
+							<ConfirmButton
 								disabled={accountingJobRunning}
 								onClick={this.onClickStartAccountingJob}
-							>
-								{accountingJobRunning
-									? "Importazione in corso"
-									: "Avvia importazione"}
-							</button>
+								text={accountingJobRunning ? "Importazione in corso" : "Avvia"}
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td><b>Aggiorna deleghe Agenzia delle Entrate</b></td>
+						<td>
+							<ConfirmButton text={delegationJobRunning ? "Aggiornamento in corso" : "Avvia"}
+								action={this.onClickStartDelegationJob} 
+								disabled={delegationJobRunning}
+							/>
 						</td>
 					</tr>
 				</tbody>

@@ -16,5 +16,7 @@ export default {
     deleteFirmContact: async(firmId, contacts) => await http.delete("anagraphic/firm/" + firmId + "/contact", contacts),
     getFirmPec: async(firmId) => await http.get("anagraphic/firm/" + firmId + "/pec"),
     createFirmPec: async(firmId, pec) => await http.post("anagraphic/firm/" + firmId + "/pec", pec),
-    deleteFirmPec: async(firmId) => await http.delete("anagraphic/firm/" + firmId)
+    deleteFirmPec: async(firmId) => await http.delete("anagraphic/firm/" + firmId),
+    updateDelegations: async() => await http.post("ade/delegations"),
+    getDelegations: async(firmId) => await http.get("ade/delegations/" + firmId)
 }

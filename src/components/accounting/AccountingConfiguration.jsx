@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import accountingApi from "../../services/accountingApi";
+import ItalianDateRenderer from "../common/date";
 import EditableInput, {
 	booleanTransformerToIcon,
 } from "./../common/editableInput";
@@ -7,6 +8,8 @@ import Select, { BooleanSelect } from "../common/select";
 import { ConfirmButton, CancelButton, IconButton } from "../common/buttons";
 import { faPlay, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import firmApi from "../../services/firmApi";
+import _ from "lodash";
 
 class AccountingConfigurationFrame extends Component {
 	state = {
@@ -15,6 +18,8 @@ class AccountingConfigurationFrame extends Component {
 		editConfiguration: null,
 		accounts: [],
 		importing: false,
+		cassetto: null,
+		fatturaElettronica: null
 	};
 	async componentDidMount() {
 		let { configuration, accounts } = this.state;
@@ -24,7 +29,10 @@ class AccountingConfigurationFrame extends Component {
 		if (configuration === null) {
 			configuration = await this.loadConfiguration();
 		}
-		this.setState({ configuration, accounts });
+		const delegations = await this.loadDelegations();
+		const cassetto = this.getDelegationType(delegations, 'CASSETTO');
+		const fatturaElettronica = this.getDelegationType(delegations, 'FATTURE');
+		this.setState({ configuration, accounts, cassetto, fatturaElettronica });
 	}
 	render() {
 		const { configuration } = this.state;
@@ -48,6 +56,15 @@ class AccountingConfigurationFrame extends Component {
 	async loadAdeAccounts() {
 		const { data } = await accountingApi.getAdeAccounts();
 		return data;
+	}
+
+	async loadDelegations() {
+		const {data} = await firmApi.getDelegations(this.getFirm().id);
+		return data;
+	}
+
+	getDelegationType(data, type) {
+		return _.find(data, elem => elem.type === type);
 	}
 
 	setEditMode = () => {
@@ -96,7 +113,7 @@ class AccountingConfigurationFrame extends Component {
 	};
 
 	createPage() {
-		const { edit, importing } = this.state;
+		const { edit, importing, fatturaElettronica, cassetto } = this.state;
 		var accounts = this.mapAccountsForSelect();
 		return (
 			<div className="container">
@@ -285,8 +302,44 @@ class AccountingConfigurationFrame extends Component {
 						)}
 					</div>
 				</div>
+				{
+					cassetto != null || fatturaElettronica != null ? this.createDelegationsComponent(cassetto, fatturaElettronica) : <React.Fragment />
+				}
 			</div>
 		);
+	}
+
+	createDelegationsComponent(cassetto, fatturaElettronica) {
+		return (
+			<div>
+				<div className="row">
+					<h3>Deleghe attive</h3>
+				</div>
+				<table className="table table-sm">
+					<thead>
+						<tr>
+							<th>Delega</th>
+							<th>Scadenza</th>
+						</tr>
+					</thead>
+					<tbody>
+					{cassetto != null ? 
+					<tr>
+						<td>Cassetto fiscale</td>
+						<td><ItalianDateRenderer date={cassetto.endDate} /></td>
+					</tr>
+						: ""}
+					{fatturaElettronica != null ? 
+					<tr>
+						<td>Fatturazione elettronica</td>
+						<td><ItalianDateRenderer date={fatturaElettronica.endDate} /></td>
+					</tr>
+						: ""}
+					</tbody>
+				</table>
+			</div>
+		);
+
 	}
 
 	mapAccountsForSelect() {
