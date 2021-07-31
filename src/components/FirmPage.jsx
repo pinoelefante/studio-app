@@ -5,6 +5,7 @@ import TabPanel from "./common/tabpanel";
 import InvoicesFrame from "./accounting/Invoices";
 import FeesFrame from "./accounting/Fees";
 import AccountingConfigurationFrame from "./accounting/AccountingConfiguration";
+import BolloFrame from './accounting/Bollo'
 
 class FirmPage extends Component {
 	state = {
@@ -99,6 +100,19 @@ class FirmPage extends Component {
 					/>
 				),
 				label: "Corrispettivi",
+				main: tabs.length === 0,
+			});
+		}
+
+		if (firmConfiguration.bolloEnabled) {
+			tabs.push({
+				id: "bollo",
+				content: (
+					<BolloFrame
+						firmId={firm.id}
+					/>
+				),
+				label: "Bollo",
 				main: tabs.length === 0,
 			});
 		}

@@ -10,6 +10,7 @@ export default {
             return await http.post("accounting/jobs/accountingJob");
         }
     },
+    runFeeJob: async() => await http.post("accounting/jobs/feeJob"),
     addAdeAccount: async(account) => await http.post("accounting/account", account),
     getAdeAccounts: async() => await http.get("accounting/account"),
     updateAdeAccountPassword: async(fiscalCode, oldPass, newPass) => await http.put(`accounting/account?fiscalCode=${fiscalCode}&old=${oldPass}&new=${newPass}`),
@@ -41,5 +42,6 @@ export default {
     },
     removeInvoiceJournal: async({firmId, date}) => {
         return await http.post(`accounting/journal/${firmId}/${date}`);
-    }
+    },
+    getBollo: async(firmId, year) => await http.get(`accounting/bollo/${firmId}/${year}`)
 }

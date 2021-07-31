@@ -17,6 +17,7 @@ class MassOperation extends Component {
 		feeMonth: null,
 		feeKeepEmpty: false,
 		accountingJobRunning: false,
+		accountingFeeRunning: false,
 		delegationJobRunning: false,
 		journal: null
 	};
@@ -119,6 +120,21 @@ class MassOperation extends Component {
 		}
 	}
 
+	onClickStartFeeJob = async () => {
+		this.setState({ accountingFeeRunning: true });
+		try {
+			await accountingApi.runFeeJob();
+			toast.info("Job completato correttamente");
+		} catch (e) {
+			console.error(e);
+			toast.error(
+				"Si è verificato un errore durante l'esecuzione del job. Controllare il log del servizio"
+			);
+		} finally {
+			this.setState({ accountingFeeRunning: false });
+		}
+	}
+
 	onClickStartDelegationJob = () => {
 		this.setState({delegationJobRunning: true});
 		firmApi.updateDelegations()
@@ -134,7 +150,7 @@ class MassOperation extends Component {
 	}
 
 	createAdeJobRunner() {
-		const { accountingJobRunning, delegationJobRunning } = this.state;
+		const { accountingJobRunning, delegationJobRunning, accountingFeeRunning } = this.state;
 		return (
 			<table className="table table-sm">
 				<tbody>
@@ -143,11 +159,20 @@ class MassOperation extends Component {
 							<b>Importa da Fatture e Corrispettivi</b>
 						</td>
 						<td>
+							<div>
 							<ConfirmButton
 								disabled={accountingJobRunning}
 								onClick={this.onClickStartAccountingJob}
-								text={accountingJobRunning ? "Importazione in corso" : "Avvia"}
+								text={accountingJobRunning ? "Importazione in corso" : "Tutti"}
 							/>
+							&nbsp;&nbsp;
+							<ConfirmButton
+								disabled={accountingFeeRunning}
+								onClick={this.onClickStartFeeJob}
+								text={accountingFeeRunning ? "Importazione in corso" : "Corrispettivi"}
+							/>
+							</div>
+							
 						</td>
 					</tr>
 					<tr>
