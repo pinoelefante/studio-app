@@ -47,9 +47,11 @@ class AccountingConfigurationFrame extends Component {
 	}
 
 	async loadConfiguration() {
+		const {onConfigurationChanged} = this.props;
 		const { data } = await accountingApi.getAccountingConfiguration(
 			this.getFirm().id
 		);
+		onConfigurationChanged(data);
 		return data;
 	}
 

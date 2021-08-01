@@ -123,6 +123,7 @@ class FirmPage extends Component {
 				<AccountingConfigurationFrame
 					firm={firm}
 					onImportComplete={this.onImportJobComplete}
+					onConfigurationChanged={this.onConfigurationChanged}
 				/>
 			),
 			label: "Configurazione",
@@ -211,6 +212,10 @@ class FirmPage extends Component {
 		console.log("Import job complete callback");
 		await this.reload();
 	};
+
+	onConfigurationChanged = (newConf) => {
+		this.setState({firmConfiguration:newConf});
+	}
 
 	async reload() {
 		const { id: firmId } = this.props.match.params;
