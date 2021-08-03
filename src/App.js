@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import FirmPage from './components/FirmPage';
 import MassOperation from './components/MassOperations';
+import LoginPage from './components/LoginPage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <AppNavBar />
       <div className="content" style={{padding:"15px"}}>
       <Switch>
+        <Route path="/login" component={LoginPage} />
         <Route path="/massive-operations" component={MassOperation} />
         <Route path="/firm/:id" component={FirmPage} />
         <Route path="/firm" component={FirmList} />

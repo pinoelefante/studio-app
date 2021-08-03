@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Input from "./input";
 
 class Form extends Component {
 	state = {
@@ -32,11 +31,11 @@ class Form extends Component {
 
 	handleSubmit = (e) => {
 		e.preventDefault();
-
+/*
 		const errors = this.validate();
 		this.setState({ errors });
 		if (errors) return;
-
+*/
 		this.doSubmit();
 	};
 
@@ -64,7 +63,7 @@ class Form extends Component {
 
 	renderSubmit(label) {
 		return (
-			<button className="btn btn-primary" disabled={this.validate}>
+			<button className="btn btn-primary" onClick={this.handleSubmit}>
 				{label}
 			</button>
 		);

@@ -11,9 +11,9 @@ export default {
         }
     },
     runFeeJob: async() => await http.post("accounting/jobs/feeJob"),
-    addAdeAccount: async(account) => await http.post("accounting/account", account),
-    getAdeAccounts: async() => await http.get("accounting/account"),
-    updateAdeAccountPassword: async(fiscalCode, oldPass, newPass) => await http.put(`accounting/account?fiscalCode=${fiscalCode}&old=${oldPass}&new=${newPass}`),
+    addAdeAccount: async(account) => await http.post("ade/account", account),
+    getAdeAccounts: async() => await http.get("ade/account"),
+    updateAdeAccountPassword: async(fiscalCode, oldPass, newPass) => await http.put(`ade/account?fiscalCode=${fiscalCode}&old=${oldPass}&new=${newPass}`),
     getAccountingConfiguration: async(firmId) => await http.get(`accounting/configuration/${firmId}`),
     createAccountingConfiguration: async(firmId, configuration) => await http.post(`accounting/configuration/${firmId}`, configuration),
     deleteAccountingConfiguration: async(firmId) => await http.post(`accounting/configuration/${firmId}`),
@@ -29,13 +29,13 @@ export default {
         return createUrl(`accounting/fee/${firmId ? `${firmId}/` : ""}${year}/${month}?pdf=true&keepEmpty=${keepEmpty}`);
     },
     getFirmInvoiceDownload: (firmId, invoiceId) => {
-        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/download`);        
+        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/download`, true);
     },
     getInvoiceViewUrl: (firmId, invoiceId) => {
-        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/view`);
+        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/view`, true);
     },
     getInvoiceAttachmentsUrl: (firmId, invoiceId) => {
-        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/attachment`);
+        return createUrl(`accounting/invoice/${firmId}/${invoiceId}/attachment`, true);
     },
     getInvoiceJournal: async () => {
         return await http.get("accounting/journal");
