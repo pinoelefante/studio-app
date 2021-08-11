@@ -37,6 +37,9 @@ export default {
     getInvoiceAttachmentsUrl: (firmId, invoiceId) => {
         return createUrl(`accounting/invoice/${firmId}/${invoiceId}/attachment`, true);
     },
+    getBolloDownloadUrl: (firmId, year, trimester) => {
+        return createUrl(`accounting/bollo/${firmId}/${year}/${trimester}/download`, true);
+    },
     getInvoiceJournal: async () => {
         return await http.get("accounting/journal");
     },

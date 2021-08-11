@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import accountingApi from '../../services/accountingApi';
 import YearSelector from '../common/yearSelector';
 import ItalianDateRenderer from '../common/date';
+import {DownloadButton2} from '../common/buttons'
 
 class BolloFrame extends Component {
     state = { bollo: null, year: null}
@@ -18,7 +19,7 @@ class BolloFrame extends Component {
             return <div></div>
         }
         
-        return this.createPage(bollo, year);
+        return this.createPage(bollo, year, firmId);
     }
 
     loadBollo = async(firmId, year) => {
@@ -32,7 +33,7 @@ class BolloFrame extends Component {
         this.loadBollo(firmId, newValue);
     }
 
-    createPage(bollo, year) {
+    createPage(bollo, year, firmId) {
         return <table>
             <tr>
                 <YearSelector from={2019} to={new Date().getFullYear()} current={year} onYearChanged={this.onYearChanged} />
@@ -55,6 +56,7 @@ class BolloFrame extends Component {
                             <td>{d.invoiceCount}</td>
                             <td>€ {d.amount}</td>
                             <td><ItalianDateRenderer date={d.expire} /></td>
+                            <td><DownloadButton2 text="F24" href={accountingApi.getBolloDownloadUrl(firmId, year, d.trimestre)}/> </td>
                         </tr>)
                     })}
                 </tbody>

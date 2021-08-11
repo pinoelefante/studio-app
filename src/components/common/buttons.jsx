@@ -7,7 +7,8 @@ import {
 	faPlus,
 	faSave,
 	faEdit,
-	faEye
+	faEye,
+	faDownload
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -51,6 +52,10 @@ export const EditButton = ({...rest}) => {
 
 export const ViewButton = ({...rest}) => {
 	return <IconButton icon={faEye} classes="btn-success" {...rest} />
+}
+
+export const DownloadButton2 = ({...rest}) => {
+	return <IconButton icon={faDownload} classes="btn-success" {...rest} />
 }
 
 export const CancelButton = ({ text, action, ...rest }) => {
