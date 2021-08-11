@@ -99,7 +99,7 @@ class Form extends Component {
 
 export default Form;
 
-const Checkbox = ({ name, label, value, error, ...rest }) => {
+export const Checkbox = ({ name, label, value, error, checked, ...rest }) => {
 	return (
 		<div className="form-check">
 			<input
@@ -108,7 +108,7 @@ const Checkbox = ({ name, label, value, error, ...rest }) => {
 				name={name}
 				id={name}
 				value={value}
-				checked={value ? "checked" : ""}
+				checked={checked ? "checked" : ""}
 				{...rest}
 			/>
 			<label className="form-check-label" htmlFor={name}>
@@ -118,12 +118,18 @@ const Checkbox = ({ name, label, value, error, ...rest }) => {
 	);
 };
 
-const Input = ({ name, label, error, ...rest }) => {
+export const Input = ({ name, label, error, ...rest }) => {
 	return (
 		<div className="form-group">
 			<label htmlFor={name}>{label}</label>
 			<input {...rest} name={name} id={name} className="form-control" />
 			{error && <div className="alert alert-danger"></div>}
 		</div>
+	);
+};
+
+export const InlineInput = ({ name, ...rest }) => {
+	return (
+		<input {...rest} name={name} id={name} className="form-control" />
 	);
 };

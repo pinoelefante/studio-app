@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 class AppNavBar extends Component {
 	state = {};
@@ -27,14 +27,26 @@ class AppNavBar extends Component {
 				>
 					<ul className="navbar-nav mr-auto">
 						<li className="nav-item">
-							<Link className="nav-link" to="/firm">
-								Aziende
-							</Link>
+							<Link className="nav-link" to="/firm">Aziende</Link>
 						</li>
 						<li className="nav-item">
-							<Link className="nav-link" to="/massive-operations">
-								Operazioni massive
-							</Link>
+							<Link className="nav-link" to="/massive-operations">Operazioni massive</Link>
+						</li>
+						<li className="nav-item dropdown">
+							<a
+								href="/#"
+								className="nav-link dropdown-toggle"
+								role="button"
+								data-toggle="dropdown"
+								aria-haspopup="true"
+								aria-expanded="false"
+							>
+								Comunicazioni
+							</a>
+							<div className="dropdown-menu">
+								<NavLink className="dropdown-item" to="/message/template">Template</NavLink>
+								{/*<NavLink className="dropdown-item" to="/message/send">Da inviare</NavLink>*/}
+							</div>
 						</li>
 						{/*
 						<li className="nav-item dropdown">

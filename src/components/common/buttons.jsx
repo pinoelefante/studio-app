@@ -3,7 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faFileDownload,
 	faArrowRight,
-	faTrash
+	faTrash,
+	faPlus,
+	faSave,
+	faEdit,
+	faEye
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -31,6 +35,22 @@ export const DeleteButton = ({...rest}) => {
 				classes="btn-danger"
 				{...rest}
 		/>
+}
+
+export const AddButton = ({...rest}) => {
+	return <IconButton icon={faPlus} classes="btn-success" {...rest} />
+}
+
+export const SaveButton = ({...rest}) => {
+	return <IconButton icon={faSave} classes="btn-success" {...rest} />
+}
+
+export const EditButton = ({...rest}) => {
+	return <IconButton icon={faEdit} classes="btn-success" {...rest} />
+}
+
+export const ViewButton = ({...rest}) => {
+	return <IconButton icon={faEye} classes="btn-success" {...rest} />
 }
 
 export const CancelButton = ({ text, action, ...rest }) => {
@@ -71,6 +91,7 @@ class Button extends Component {
 	render() {
 		const buttonStyle = {
 			minWidth: "50px",
+			margin: "0 10px 0 0"
 		};
 		const {
 			content,

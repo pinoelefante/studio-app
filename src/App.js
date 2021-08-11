@@ -8,6 +8,10 @@ import './App.css';
 import FirmPage from './components/FirmPage';
 import MassOperation from './components/MassOperations';
 import LoginPage from './components/LoginPage';
+import MessageTemplateCompiler from './components/communication/MessageTemplateCompiler';
+import MessageTemplateList from './components/communication/MessageTemplateList';
+import MessageGroupListView from './components/communication/MessageGroupListView';
+import MessageGroupView from './components/communication/MessageGroupView';
 
 function App() {
   return (
@@ -15,6 +19,11 @@ function App() {
       <AppNavBar />
       <div className="content" style={{padding:"15px"}}>
       <Switch>
+        <Route path="/message/group/:id" component={MessageGroupView} />
+        <Route path="/message/template/:id/groups" component={MessageGroupListView} />
+        <Route path="/message/template/new" component={MessageTemplateCompiler} />
+        <Route path="/message/template/:id" component={MessageTemplateCompiler} />
+        <Route path="/message/template" component={MessageTemplateList} />
         <Route path="/login" component={LoginPage} />
         <Route path="/massive-operations" component={MassOperation} />
         <Route path="/firm/:id" component={FirmPage} />
@@ -23,7 +32,7 @@ function App() {
       </Switch>
       
     </div>
-      <ToastContainer position="top-right" autoClose={5000}/>
+      <ToastContainer position="top-right" autoClose={5000} />
     </React.Fragment>
   );
 }

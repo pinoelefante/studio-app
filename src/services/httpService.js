@@ -3,7 +3,6 @@ import config from '../config.json'
 import { toast } from 'react-toastify'
 
 axios.interceptors.request.use(request => {
-    console.log("Adding token");
     const token = localStorage.getItem("authToken");
     if (token) {
         request.headers.token = token;
@@ -15,12 +14,10 @@ axios.interceptors.response.use(success => {
     return success;
 }, 
 error => {
-    const loginRequired = error.response && error.response.status === 403;
-    const expectedError = error.response && error.response.status >= 400 && error.response.status <= 500;
+    const loginRequired = error.response && (error.response.status === 403 || error.response.status === 500);
     
-    if (!expectedError) {
-        console.log("Unexpected error", error);
-    } else {
+    console.log("httpError", error);
+    if (loginRequired) {
         window.location = "/login";
     }
     return Promise.reject(error);
