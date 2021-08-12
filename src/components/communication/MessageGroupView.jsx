@@ -4,8 +4,8 @@ import communicationApi from '../../services/communicationApi';
 import { Checkbox, Input } from '../common/form';
 import $ from 'jquery';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faEdit} from "@fortawesome/free-solid-svg-icons";
-import { AddButton, DeleteButton, SaveButton } from '../common/buttons';
+import {faEdit, faLock, faUnlock, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import { AddButton, DeleteButton, IconButton, SaveButton } from '../common/buttons';
 import { toast } from 'react-toastify';
 import MyModal from '../common/modal';
 
@@ -65,6 +65,8 @@ class MessageGroupView extends Component {
             <div className="row" style={{margin: "10px 0"}}>
                 <AddButton text="Aggiungi azienda" onClick={this.showModalFirm}  />
                 <SaveButton text="Salva dati" onClick={this.saveRemoteData}/>
+                <IconButton icon={faLock} text="Chiudi completati" onClick={this.closeCompleted} classes="btn-success" />
+                <IconButton icon={faUnlock} text="Riapri completati" onClick={this.reopenCompleted} classes="btn-success" />
             </div>
             <div className="row" style={{margin: "10px 0"}}>
                 <Checkbox label="Applica a tutti" value={applyAll} checked={applyAll} onChange={this.markApplyAll} />
@@ -87,12 +89,15 @@ class MessageGroupView extends Component {
     showMessage(message) {
         const bgcolor = message.sent ? (message.error ? "red" : "green") : "yellow";
         const color = message.sent ? "white" : "black";
-        const status = message.sent ? (message.error ? "In errore" : "Inviato") : "Da inviare";
+        const status = message.sent ? (message.error ? `In errore (${message.error})`  : "Inviato") : "Da inviare";
         const values = message.draftValues;
         const isChanged = this.isChanged(message);
         return <React.Fragment key={`fragment_${message.id}` }>
             <div className="row">
-                <div className="col-12" style={{backgroundColor:bgcolor, borderBottom: "1px solid black", color:color}}><span>{isChanged ? <FontAwesomeIcon icon={faEdit}/> : "" }</span>{status} - {message.firm.name} - {message.firm.fiscalCode}</div>
+                <div className="col-12" style={{backgroundColor:bgcolor, borderBottom: "1px solid black", color:color}}>
+                    <span>{message.closed ? <FontAwesomeIcon icon={faLock}/> : "" }</span>
+                    <span>{isChanged ? <FontAwesomeIcon icon={faEdit}/> : "" }</span>
+                    {status} - {message.firm.name} - {message.firm.fiscalCode}</div>
             </div>
             <div className="row">
                 <div className="col-4">
@@ -104,6 +109,8 @@ class MessageGroupView extends Component {
                 </div>
                 <div className="col-2" style={{margin: "10px"}}>
                     <DeleteButton text="Rimuovi" onClick={() => this.removeMessage(message)} />
+                    {message.closed ? <IconButton text="Riapri" classes="btn-warning" icon={faUnlock} onClick={() => this.unlockMessage(message)} /> : <IconButton text="Chiudi" classes="btn-warning" icon={faLock} onClick={() => this.lockMessage(message)} />}
+                    {message.closed && !message.sent ? <IconButton text="Invia" classes="btn-success" icon={faPaperPlane} onClick={() => this.sendMessage(message)} /> : ""}
                 </div>
             </div>
         </React.Fragment>
@@ -138,16 +145,18 @@ class MessageGroupView extends Component {
         const value = input.value;
 
         const {applyAll} = this.state;
+
+        const messageId = $(input).data("message");
+        const message = _.find(messages, m => m.id === Number.parseInt(messageId))
+        if (!message || message.closed) return;
         
         if (applyAll) {
             _.each(messages, m => {
+                if (m.closed) return;
                 const property = _.find(m.draftValues, p => p.name === input.name);
                 property.value = value;
             });
         } else {
-            const messageId = $(input).data("message");
-            const message = _.find(messages, m => m.id === Number.parseInt(messageId));
-            if (!message) return;
             const property = _.find(message.draftValues, p => p.name === input.name);
             property.value = value;
         }
@@ -254,6 +263,56 @@ class MessageGroupView extends Component {
         const {applyAll} = this.state;
         const newVal = !applyAll;
         this.setState({applyAll:newVal});
+    }
+
+    closeCompleted = () => {
+        const {id: groupId} = this.state.group;
+        communicationApi.closeCompletedMessages(groupId)
+            .then(r => this.loadData(groupId));
+    }
+
+    reopenCompleted = () => {
+        const {id: groupId} = this.state.group;
+        communicationApi.openCompletedMessages(groupId)
+            .then(r => this.loadData(groupId));
+    }
+
+    unlockMessage = (message) => {
+        communicationApi.unlockMessage(message.id)
+            .then(r => {
+                const isOk = r.data.status;
+                if (isOk) {
+                    const {group} = this.state;
+                    this.loadData(group.id);
+                } else {
+                    toast.warning("Non è stato possibile sbloccare il messaggio");
+                }
+            })
+    }
+
+    lockMessage = (message) => {
+        communicationApi.lockMessage(message.id)
+        .then(r => {
+            const isOk = r.data.status;
+            if (isOk) {
+                const {group} = this.state;
+                this.loadData(group.id);
+            } else {
+                toast.warning("Non è stato possibile bloccare il messaggio");
+            }
+        })
+    }
+
+    sendMessage = (message) => {
+        communicationApi.sendMessage(message.id)
+            .then(r => {
+                const isOk = r.data.status;
+                const {group} = this.state;
+                if (!isOk) {
+                    toast.error("Non è stato possibile inviare il messaggio");
+                }
+                this.loadData(group.id);
+            })
     }
 }
  

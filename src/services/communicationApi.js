@@ -14,10 +14,15 @@ export default {
     messagesToSend: () => httpService.get("/communication/to_send"),
     saveMessageDraft: (messages) => httpService.put("/communication/message", messages),
     deleteMessage: (messageId) => httpService.delete(`/communication/message/${messageId}`),
+    lockMessage: (messageId) => httpService.post(`/communication/message/${messageId}/lock`),
+    unlockMessage: (messageId) => httpService.post(`/communication/message/${messageId}/unlock`),
+    sendMessage: (messageId) => httpService.post(`/communication/message/${messageId}/send`),
 
     /* Groups */
     createGroup: (group) => httpService.post("/communication/group", group),
     getGroup: (id) => httpService.get(`/communication/group/${id}`),
     addFirmsToGroup: (groupId, firms) => httpService.post(`/communication/group/${groupId}`, firms),
-    getFirmsForGroup: (groupId) => httpService.get(`/communication/group/${groupId}/firm`)
+    getFirmsForGroup: (groupId) => httpService.get(`/communication/group/${groupId}/firm`),
+    closeCompletedMessages: (groupId) => httpService.post(`/communication/group/${groupId}/complete`),
+    openCompletedMessages: (groupId) => httpService.post(`/communication/group/${groupId}/unlock`)
 }
