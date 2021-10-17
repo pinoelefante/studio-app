@@ -16,6 +16,7 @@ class MassOperation extends Component {
 		feeYear: null,
 		feeMonth: null,
 		feeKeepEmpty: false,
+		incompleteFee: [],
 		accountingJobRunning: false,
 		accountingFeeRunning: false,
 		delegationJobRunning: false,
@@ -27,6 +28,11 @@ class MassOperation extends Component {
 			const {data} = response;
 			this.setState({journal: data });
 		});
+
+		accountingApi.getIncompleteFee().then(response => {
+			const {data} = response;
+			this.setState({incompleteFee:data});
+		})
 	}
 
 	render() {
@@ -44,6 +50,7 @@ class MassOperation extends Component {
 			feeYear: year,
 			feeMonth: month,
 			feeKeepEmpty: keepEmpty,
+			incompleteFee: incomplete
 		} = this.state;
 		const currentYear = new Date().getFullYear();
 		year = year === null ? new Date().getFullYear() : year;
@@ -98,6 +105,12 @@ class MassOperation extends Component {
 									Scarica PDF
 								</button>
 							</a>
+						</td>
+					</tr>
+					<tr>
+						<td><b>Corrispettivi incompleti ({incomplete.length})</b></td>
+						<td colSpan="2">
+							{incomplete.map(inc => <span><Link to={"/firm/" + inc.id}>{inc.name}</Link><br /></span>)}
 						</td>
 					</tr>
 				</tbody>

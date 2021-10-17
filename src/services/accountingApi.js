@@ -43,6 +43,7 @@ export default {
     getInvoiceJournal: async () => {
         return await http.get("accounting/journal");
     },
+    getIncompleteFee: async () => await http.get("accounting/fee/incomplete"),
     removeInvoiceJournal: async({firmId, date}) => {
         return await http.post(`accounting/journal/${firmId}/${date}`);
     },
