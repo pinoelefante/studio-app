@@ -47,5 +47,6 @@ export default {
     removeInvoiceJournal: async({firmId, date}) => {
         return await http.post(`accounting/journal/${firmId}/${date}`);
     },
-    getBollo: async(firmId, year) => await http.get(`accounting/bollo/${firmId}/${year}`)
+    getBollo: async(firmId, year) => await http.get(`accounting/bollo/${firmId}/${year}`),
+    getExpiringDelegationsAccounting: async() => await http.get(`ade/delegations/expiring/accounting`)
 }

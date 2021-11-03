@@ -3,6 +3,7 @@ import accountingApi from "../services/accountingApi";
 import firmApi from "../services/firmApi";
 import MonthSelector from "./common/monthSelector";
 import YearSelector from "./common/yearSelector";
+import ItalianDateRenderer from "./common/date";
 import Checkbox from "./common/checkbox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +11,7 @@ import { toast } from "react-toastify";
 import { ConfirmButton, DeleteButton } from "./common/buttons";
 import _ from 'lodash'
 import { Link } from "react-router-dom";
+import Collapse from "./common/collapse"
 
 class MassOperation extends Component {
 	state = {
@@ -17,6 +19,7 @@ class MassOperation extends Component {
 		feeMonth: null,
 		feeKeepEmpty: false,
 		incompleteFee: [],
+		expiringDelegations: [],
 		accountingJobRunning: false,
 		accountingFeeRunning: false,
 		delegationJobRunning: false,
@@ -32,7 +35,12 @@ class MassOperation extends Component {
 		accountingApi.getIncompleteFee().then(response => {
 			const {data} = response;
 			this.setState({incompleteFee:data});
-		})
+		});
+
+		accountingApi.getExpiringDelegationsAccounting().then(response =>{
+			const {data} = response;
+			this.setState({expiringDelegations:data});
+		});
 	}
 
 	render() {
@@ -40,7 +48,9 @@ class MassOperation extends Component {
 			<div>
 				{this.createAdeJobRunner()}
 				{this.createFeeExport()}
+				{this.createIncompleteFee()}
 				{this.createJournal()}
+				{this.createExpiringDelegations()}
 			</div>
 		);
 	}
@@ -49,8 +59,7 @@ class MassOperation extends Component {
 		let {
 			feeYear: year,
 			feeMonth: month,
-			feeKeepEmpty: keepEmpty,
-			incompleteFee: incomplete
+			feeKeepEmpty: keepEmpty
 		} = this.state;
 		const currentYear = new Date().getFullYear();
 		year = year === null ? new Date().getFullYear() : year;
@@ -107,15 +116,18 @@ class MassOperation extends Component {
 							</a>
 						</td>
 					</tr>
-					<tr>
-						<td><b>Corrispettivi incompleti ({incomplete.length})</b></td>
-						<td colSpan="2">
-							{incomplete.map(inc => <span><Link to={"/firm/" + inc.id}>{inc.name}</Link><br /></span>)}
-						</td>
-					</tr>
 				</tbody>
 			</table>
 		);
+	}
+
+	createIncompleteFee() {
+		let {incompleteFee: incomplete} = this.state;
+		let body = <div>
+			{incomplete.map(inc => <span><Link to={"/firm/" + inc.id}>{inc.name}</Link><br /></span>)}
+		</div>
+		let title = `Corrispettivi incompleti (${incomplete.length})`;
+		return <Collapse id="fee_incomplete" title={title} body={body} />
 	}
 
 	onClickStartAccountingJob = async () => {
@@ -204,12 +216,13 @@ class MassOperation extends Component {
 
 	createJournal() {
 		const {journal} = this.state;
-		return <React.Fragment>
-			<h4>Fatture da importare</h4>
-			{
-				journal !== null ? this.renderJournal(journal) : "Non ci sono dati da importare"
-			}
-		</React.Fragment>;
+		if (journal == null) {
+			return "";
+		}
+		let title = `Fatture da importare (${journal == null ? "0" : journal.length})`
+		let body = journal !== null ? this.renderJournal(journal) : "Non ci sono dati da importare";
+
+		return <Collapse id="invoice_journal" title={title} body={body} />;
 	}
 
 	renderJournal(journal) {
@@ -242,6 +255,18 @@ class MassOperation extends Component {
 		}).catch((reason) => {
 			toast.error(reason);
 		});
+	}
+
+	createExpiringDelegations() {
+		const {expiringDelegations: delegations} = this.state;
+		if (delegations === null || delegations.length === 0) {
+			return "";
+		}
+		let title = `Delega fattura elettronica in scadenza (${delegations.length})`;
+		let body = <table className="table table-sm">
+			{delegations.map(delegation => <tr><td><Link to={"/firm/" + delegation.id}>{delegation.name}</Link></td><td><ItalianDateRenderer date={delegation.expire} /></td></tr>)}
+		</table>
+		return <Collapse id="expiring_delegations_invoice" title={title} body={body} />
 	}
 }
 
