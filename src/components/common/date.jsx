@@ -7,7 +7,7 @@ const ItalianDateRenderer = ({ date }) => {
 	}
 
 	if (date === null) {
-		return <p>-</p>;
+		return <span>-</span>;
 	}
 	const toDate = new Date(date);
 	const y = getValue(toDate.getFullYear());
