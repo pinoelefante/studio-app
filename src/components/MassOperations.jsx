@@ -236,7 +236,7 @@ class MassOperation extends Component {
 						<tr key={"row_" + (rowIndex++)}>
 							<td><Link to={"/firm/" + journalEntry.firmId}>{journalEntry.firmId} - {journalEntry.firmName}</Link></td>
 							<td>{journalEntry.date}</td>
-							<td>{journalEntry.count} fatture</td>
+							<td>{journalEntry.count} fatture (Inviate: {journalEntry.sent} - Ricevute: {journalEntry.received})</td>
 							<td><DeleteButton onClick = {() => this.removeJournalEntry(journalEntry)}/></td>
 						</tr>
 						)
