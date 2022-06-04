@@ -19,7 +19,8 @@ class AccountingConfigurationFrame extends Component {
 		accounts: [],
 		importing: false,
 		cassetto: null,
-		fatturaElettronica: null
+		fatturaElettronica: null,
+		downloadRules: {byType:[], bySectional:[], byInvoiceId:[], byDocumentType:[], storageDownload: false, downloadAll: false}
 	};
 	async componentDidMount() {
 		let { configuration, accounts } = this.state;
@@ -32,7 +33,8 @@ class AccountingConfigurationFrame extends Component {
 		const delegations = await this.loadDelegations();
 		const cassetto = this.getDelegationType(delegations, 'CASSETTO');
 		const fatturaElettronica = this.getDelegationType(delegations, 'FATTURE');
-		this.setState({ configuration, accounts, cassetto, fatturaElettronica });
+		const downloadRules = await this.getDownloadRules();
+		this.setState({ configuration, accounts, cassetto, fatturaElettronica, downloadRules });
 	}
 	render() {
 		const { configuration } = this.state;
@@ -62,6 +64,11 @@ class AccountingConfigurationFrame extends Component {
 
 	async loadDelegations() {
 		const {data} = await firmApi.getDelegations(this.getFirm().id);
+		return data;
+	}
+
+	async getDownloadRules() {
+		const {data} = await accountingApi.getInvoiceDownloadRules(this.getFirm().id);
 		return data;
 	}
 
@@ -115,7 +122,7 @@ class AccountingConfigurationFrame extends Component {
 	};
 
 	createPage() {
-		const { edit, importing, fatturaElettronica, cassetto } = this.state;
+		const { edit, importing, fatturaElettronica, cassetto, downloadRules } = this.state;
 		var accounts = this.mapAccountsForSelect();
 		return (
 			<div className="container">
@@ -307,6 +314,9 @@ class AccountingConfigurationFrame extends Component {
 				{
 					cassetto != null || fatturaElettronica != null ? this.createDelegationsComponent(cassetto, fatturaElettronica) : <React.Fragment />
 				}
+				{
+					this.createDownloadRulesComponent(downloadRules)
+				}
 			</div>
 		);
 	}
@@ -342,6 +352,21 @@ class AccountingConfigurationFrame extends Component {
 			</div>
 		);
 
+	}
+
+	createDownloadRulesComponent(downloadRules) {
+		//{byType:[], bySectional:[], byInvoiceId:[], byDocumentType:[], storageDownload: false, downloadAll: false}
+		return <div>
+			<div className="row">
+				<h3>Regole download</h3>
+			</div>
+			<p>Scarica tutte: {downloadRules.downloadAll ? <b>SI</b>: <b>NO</b>}</p>	
+			<p>Scarica tutte per conservare: {downloadRules.storageDownload ? <b>SI</b> : <b>NO</b> }</p>
+			{downloadRules.byType.map(byType => <p>Scarica per tipo: {byType.invoiceType}</p>)}
+			{downloadRules.byDocumentType.map(byDType => <p>Scarica per tipo documento: <b>{byDType.invoiceType}</b> - <b>{byDType.invoiceDocumentType}</b></p>)}
+			{downloadRules.bySectional.map(bySec => <p>Scarica per tipo documento: <b>{bySec.invoiceType}</b> - Separatore: <b>{bySec.separator}</b> Sezionale: <b>{bySec.sectional}</b> Posizione: <b>{bySec.sectionalIndex}</b> </p>)}
+			{downloadRules.byInvoiceId.map(byId => <p>Scarica per id: <b>{byId.invoiceId}</b></p>)}
+		</div>
 	}
 
 	mapAccountsForSelect() {

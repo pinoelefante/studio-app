@@ -22,14 +22,20 @@ class MassOperation extends Component {
 		expiringDelegations: [],
 		accountingJobRunning: false,
 		accountingFeeRunning: false,
+		accountingBolloRunning: false,
 		delegationJobRunning: false,
-		journal: null
+		journal: null,
+		bolloJournal: null
 	};
 
 	componentDidMount() {
 		accountingApi.getInvoiceJournal().then( response => {
 			const {data} = response;
 			this.setState({journal: data });
+		});
+
+		accountingApi.getBolloJournal().then(({data}) => {
+			this.setState({bolloJournal: data})
 		});
 
 		accountingApi.getIncompleteFee().then(response => {
@@ -50,6 +56,7 @@ class MassOperation extends Component {
 				{this.createFeeExport()}
 				{this.createIncompleteFee()}
 				{this.createJournal()}
+				{this.createBolloJournal()}
 				{this.createExpiringDelegations()}
 			</div>
 		);
@@ -160,6 +167,21 @@ class MassOperation extends Component {
 		}
 	}
 
+	onClickStartBolloJob = async () => {
+		this.setState({ accountingBolloRunning: true });
+		try {
+			await accountingApi.runBolloJob();
+			toast.info("Job completato correttamente");
+		} catch (e) {
+			console.error(e);
+			toast.error(
+				"Si è verificato un errore durante l'esecuzione del job. Controllare il log del servizio"
+			);
+		} finally {
+			this.setState({ accountingBolloRunning: false });
+		}
+	}
+
 	onClickStartDelegationJob = () => {
 		this.setState({delegationJobRunning: true});
 		firmApi.updateDelegations()
@@ -175,7 +197,7 @@ class MassOperation extends Component {
 	}
 
 	createAdeJobRunner() {
-		const { accountingJobRunning, delegationJobRunning, accountingFeeRunning } = this.state;
+		const { accountingJobRunning, delegationJobRunning, accountingFeeRunning, accountingBolloRunning } = this.state;
 		return (
 			<table className="table table-sm">
 				<tbody>
@@ -192,9 +214,15 @@ class MassOperation extends Component {
 							/>
 							&nbsp;&nbsp;
 							<ConfirmButton
-								disabled={accountingFeeRunning}
+								disabled={accountingFeeRunning || accountingJobRunning}
 								onClick={this.onClickStartFeeJob}
-								text={accountingFeeRunning ? "Importazione in corso" : "Corrispettivi"}
+								text={accountingFeeRunning || accountingJobRunning ? "Importazione in corso" : "Corrispettivi"}
+							/>
+							&nbsp;&nbsp;
+							<ConfirmButton
+								disabled={accountingBolloRunning || accountingJobRunning}
+								onClick={this.onClickStartBolloJob}
+								text={accountingBolloRunning || accountingJobRunning ? "Importazione in corso" : "Bollo"}
 							/>
 							</div>
 							
@@ -225,6 +253,17 @@ class MassOperation extends Component {
 		return <Collapse id="invoice_journal" title={title} body={body} />;
 	}
 
+	createBolloJournal() {
+		const {bolloJournal:journal} = this.state;
+		if (journal == null) {
+			return "";
+		}
+		let title = `Bolli scaricati (${journal == null ? "0" : journal.length})`
+		let body = journal !== null ? this.renderBolloJournal(journal) : "Non ci sono dati da importare";
+
+		return <Collapse id="invoice_journal" title={title} body={body} />;
+	}
+
 	renderJournal(journal) {
 		let rowIndex = 0;
 		return (
@@ -247,11 +286,42 @@ class MassOperation extends Component {
 		);
 	}
 
+	renderBolloJournal(journal) {
+		let rowIndex = 0;
+		return (
+			<table className="table table-sm">
+				<tbody>
+				{ 
+					journal.map(journalEntry => {
+						return 	(
+						<tr key={"row_bolloj_" + (rowIndex++)}>
+							<td><Link to={"/firm/" + journalEntry.firmId}>{journalEntry.firmId} - {journalEntry.firmName}</Link></td>
+							<td>Anno {journalEntry.year} - Trimestre {journalEntry.trimestre}</td>
+							<td><DeleteButton onClick = {() => this.removeBolloJournalEntry(journalEntry)}/></td>
+						</tr>
+						)
+					})
+				}
+				</tbody>
+			</table>
+		);
+	}
+
 	removeJournalEntry(entry) {
 		accountingApi.removeInvoiceJournal(entry).then((response) => {
 			const journal = {...this.state.journal}
 			const newJournal = _.filter(journal, (i) => i !== entry);
 			this.setState({journal: newJournal});
+		}).catch((reason) => {
+			toast.error(reason);
+		});
+	}
+
+	removeBolloJournalEntry(entry) {
+		accountingApi.removeBolloInvoiceJournal(entry).then((response) => {
+			const journal = {...this.state.bolloJournal}
+			const newJournal = _.filter(journal, (i) => i !== entry);
+			this.setState({bolloJournal: newJournal});
 		}).catch((reason) => {
 			toast.error(reason);
 		});

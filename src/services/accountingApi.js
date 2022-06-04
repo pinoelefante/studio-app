@@ -11,6 +11,7 @@ export default {
         }
     },
     runFeeJob: async() => await http.post("accounting/jobs/feeJob"),
+    runBolloJob: async() => await http.post("accounting/jobs/bolloJob"),
     addAdeAccount: async(account) => await http.post("ade/account", account),
     getAdeAccounts: async() => await http.get("ade/account"),
     updateAdeAccountPassword: async(fiscalCode, oldPass, newPass) => await http.put(`ade/account?fiscalCode=${fiscalCode}&old=${oldPass}&new=${newPass}`),
@@ -37,15 +38,24 @@ export default {
     getInvoiceAttachmentsUrl: (firmId, invoiceId) => {
         return createUrl(`accounting/invoice/${firmId}/${invoiceId}/attachment`, true);
     },
+    getInvoiceDownloadRules: async (firmId) => {
+        return await http.get(`accounting/invoice/${firmId}/download_rules`);
+    },
     getBolloDownloadUrl: (firmId, year, trimester) => {
         return createUrl(`accounting/bollo/${firmId}/${year}/${trimester}/download`, true);
     },
     getInvoiceJournal: async () => {
-        return await http.get("accounting/journal");
+        return await http.get("accounting/journal/invoice");
+    },
+    getBolloJournal: async () => {
+        return await http.get("accounting/journal/bollo");
     },
     getIncompleteFee: async () => await http.get("accounting/fee/incomplete"),
     removeInvoiceJournal: async({firmId, date}) => {
-        return await http.post(`accounting/journal/${firmId}/${date}`);
+        return await http.post(`accounting/journal/invoice/${firmId}/${date}`);
+    },
+    removeBolloInvoiceJournal: async({firmId, year, trimestre}) => {
+        return await http.post(`accounting/journal/bollo/${firmId}/${year}/${trimestre}`);
     },
     getBollo: async(firmId, year) => await http.get(`accounting/bollo/${firmId}/${year}`),
     getExpiringDelegationsAccounting: async() => await http.get(`ade/delegations/expiring/accounting`)
