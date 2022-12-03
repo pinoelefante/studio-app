@@ -25,7 +25,8 @@ class MassOperation extends Component {
 		accountingBolloRunning: false,
 		delegationJobRunning: false,
 		journal: null,
-		bolloJournal: null
+		bolloJournal: null,
+		feeJournal: null
 	};
 
 	componentDidMount() {
@@ -36,6 +37,10 @@ class MassOperation extends Component {
 
 		accountingApi.getBolloJournal().then(({data}) => {
 			this.setState({bolloJournal: data})
+		});
+
+		accountingApi.getFeeJournal().then(({data}) => {
+			this.setState({feeJournal: data})
 		});
 
 		accountingApi.getIncompleteFee().then(response => {
@@ -56,6 +61,7 @@ class MassOperation extends Component {
 				{this.createFeeExport()}
 				{this.createIncompleteFee()}
 				{this.createJournal()}
+				{this.createFeeJournal()}
 				{this.createBolloJournal()}
 				{this.createExpiringDelegations()}
 			</div>
@@ -247,9 +253,9 @@ class MassOperation extends Component {
 		if (journal == null) {
 			return "";
 		}
-		let title = `Fatture da importare (${journal == null ? "0" : journal.length})`
+		let title = `Fatture da importare (${journal.length})`
 		let body = journal !== null ? this.renderJournal(journal) : "Non ci sono dati da importare";
-
+		if (journal.length == 0) return <div></div>;
 		return <Collapse id="invoice_journal" title={title} body={body} />;
 	}
 
@@ -258,10 +264,22 @@ class MassOperation extends Component {
 		if (journal == null) {
 			return "";
 		}
-		let title = `Bolli scaricati (${journal == null ? "0" : journal.length})`
+		let title = `Bolli scaricati (${journal.length})`
 		let body = journal !== null ? this.renderBolloJournal(journal) : "Non ci sono dati da importare";
+		if (journal.length == 0) return <div></div>;
+		return <Collapse id="invoice_bollo_journal" title={title} body={body} />;
+	}
 
-		return <Collapse id="invoice_journal" title={title} body={body} />;
+	createFeeJournal() {
+		const {feeJournal:journal} = this.state;
+		if (journal == null) {
+			return "";
+		}
+		let count = journal == null ? 0 : journal.length;
+		let title = `Corrispettivi aggiornati (${count})`
+		let body = journal !== null ? this.renderFeeJournal(journal) : "Non ci sono dati da importare";
+		if (count == 0) return <div></div>;
+		return <Collapse id="invoice_fee_journal" title={title} body={body} />;
 	}
 
 	renderJournal(journal) {
@@ -277,6 +295,27 @@ class MassOperation extends Component {
 							<td>{journalEntry.date}</td>
 							<td>{journalEntry.count} fatture (Inviate: {journalEntry.sent} - Ricevute: {journalEntry.received})</td>
 							<td><DeleteButton onClick = {() => this.removeJournalEntry(journalEntry)}/></td>
+						</tr>
+						)
+					})
+				}
+				</tbody>
+			</table>
+		);
+	}
+
+	renderFeeJournal(journal) {
+		let rowIndex = 0;
+		return (
+			<table className="table table-sm">
+				<tbody>
+				{ 
+					journal.map(journalEntry => {
+						return 	(
+						<tr key={"row_" + (rowIndex++)}>
+							<td><Link to={"/firm/" + journalEntry.firmId}>{journalEntry.firmId} - {journalEntry.firmName}</Link></td>
+							<td>{journalEntry.month}/{journalEntry.year}</td>
+							<td><DeleteButton onClick = {() => this.removeJournalFeeEntry(journalEntry)}/></td>
 						</tr>
 						)
 					})
@@ -312,6 +351,16 @@ class MassOperation extends Component {
 			const journal = {...this.state.journal}
 			const newJournal = _.filter(journal, (i) => i !== entry);
 			this.setState({journal: newJournal});
+		}).catch((reason) => {
+			toast.error(reason);
+		});
+	}
+
+	removeJournalFeeEntry(entry) {
+		accountingApi.removeFeeInvoiceJournal(entry).then((response) => {
+			const journal = {...this.state.feeJournal}
+			const newJournal = _.filter(journal, (i) => i !== entry);
+			this.setState({feeJournal: newJournal});
 		}).catch((reason) => {
 			toast.error(reason);
 		});

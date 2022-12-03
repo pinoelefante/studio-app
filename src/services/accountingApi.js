@@ -50,12 +50,18 @@ export default {
     getBolloJournal: async () => {
         return await http.get("accounting/journal/bollo");
     },
+    getFeeJournal: async() => {
+        return await http.get("accounting/journal/fee");
+    },
     getIncompleteFee: async () => await http.get("accounting/fee/incomplete"),
     removeInvoiceJournal: async({firmId, date}) => {
         return await http.post(`accounting/journal/invoice/${firmId}/${date}`);
     },
     removeBolloInvoiceJournal: async({firmId, year, trimestre}) => {
         return await http.post(`accounting/journal/bollo/${firmId}/${year}/${trimestre}`);
+    },
+    removeFeeInvoiceJournal: async({firmId, year, month}) => {
+        return await http.post(`accounting/journal/fee/${firmId}/${year}/${month}`);
     },
     getBollo: async(firmId, year) => await http.get(`accounting/bollo/${firmId}/${year}`),
     getExpiringDelegationsAccounting: async() => await http.get(`ade/delegations/expiring/accounting`)
