@@ -44,6 +44,16 @@ class FeesFrame extends Component {
 		);
 	}
 
+	createDataAccoglienza = (date, diff) => {
+		let classes = diff > 12 ? "late-fee" : "";
+		return <span className={classes}>
+			{
+				date.map(dataAcc => <span><ItalianDateRenderer date={dataAcc} />&nbsp;</span>)
+			}
+		</span>;
+		
+	}
+
 	createFeeTable(fees, showIfEmpty = false, title = "") {
 		if (!this.hasFeeDetails(fees)) {
 			return showIfEmpty ? (
@@ -63,6 +73,7 @@ class FeesFrame extends Component {
 						<tr>
 							<th>Data</th>
 							<th>Valore</th>
+							<th>Data invio</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -72,6 +83,11 @@ class FeesFrame extends Component {
 									<ItalianDateRenderer date={d.date} />
 								</td>
 								<td>€ {d.amount}</td>
+								<td>
+								{
+									this.createDataAccoglienza(d.dataAccoglienza, d.diffGiorni)
+								}
+							</td>
 							</tr>
 						))}
 						<tr>
@@ -81,6 +97,7 @@ class FeesFrame extends Component {
 							<td>
 								<b>€ {total}</b>
 							</td>
+							<td>&nbsp;</td>
 						</tr>
 					</tbody>
 				</table>
