@@ -8,7 +8,7 @@ import Checkbox from "./common/checkbox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { ConfirmButton, DeleteButton } from "./common/buttons";
+import { ConfirmButton, DeleteButton, DownloadButton2 } from "./common/buttons";
 import _ from 'lodash'
 import { Link } from "react-router-dom";
 import Collapse from "./common/collapse"
@@ -250,35 +250,35 @@ class MassOperation extends Component {
 
 	createJournal() {
 		const {journal} = this.state;
-		if (journal == null) {
+		if (journal === null) {
 			return "";
 		}
 		let title = `Fatture da importare (${journal.length})`
-		let body = journal !== null ? this.renderJournal(journal) : "Non ci sono dati da importare";
-		if (journal.length == 0) return <div></div>;
+		let body = this.renderJournal(journal);
+		if (journal.length === 0) return <div></div>;
 		return <Collapse id="invoice_journal" title={title} body={body} />;
 	}
 
 	createBolloJournal() {
 		const {bolloJournal:journal} = this.state;
-		if (journal == null) {
+		if (journal === null) {
 			return "";
 		}
 		let title = `Bolli scaricati (${journal.length})`
-		let body = journal !== null ? this.renderBolloJournal(journal) : "Non ci sono dati da importare";
-		if (journal.length == 0) return <div></div>;
+		let body = this.renderBolloJournal(journal);
+		if (journal.length === 0) return <div></div>;
 		return <Collapse id="invoice_bollo_journal" title={title} body={body} />;
 	}
 
 	createFeeJournal() {
 		const {feeJournal:journal} = this.state;
-		if (journal == null) {
+		if (journal === null) {
 			return "";
 		}
-		let count = journal == null ? 0 : journal.length;
+		let count = journal.length;
 		let title = `Corrispettivi aggiornati (${count})`
-		let body = journal !== null ? this.renderFeeJournal(journal) : "Non ci sono dati da importare";
-		if (count == 0) return <div></div>;
+		let body = this.renderFeeJournal(journal);
+		if (count === 0) return <div></div>;
 		return <Collapse id="invoice_fee_journal" title={title} body={body} />;
 	}
 
@@ -332,11 +332,15 @@ class MassOperation extends Component {
 				<tbody>
 				{ 
 					journal.map(journalEntry => {
+						const {firmId, year, trimestre, firmName } = journalEntry;
 						return 	(
 						<tr key={"row_bolloj_" + (rowIndex++)}>
-							<td><Link to={"/firm/" + journalEntry.firmId}>{journalEntry.firmId} - {journalEntry.firmName}</Link></td>
-							<td>Anno {journalEntry.year} - Trimestre {journalEntry.trimestre}</td>
-							<td><DeleteButton onClick = {() => this.removeBolloJournalEntry(journalEntry)}/></td>
+							<td><Link to={"/firm/" + firmId}>{firmId} - {firmName}</Link></td>
+							<td>Anno {year} - Trimestre {trimestre}</td>
+							<td>
+								<DownloadButton2 text="F24" href={accountingApi.getBolloDownloadUrl(firmId, year, trimestre)}></DownloadButton2>
+								<DeleteButton onClick = {() => this.removeBolloJournalEntry(journalEntry)}/>
+							</td>
 						</tr>
 						)
 					})
