@@ -6,11 +6,13 @@ import MyModal from "./common/modal";
 import $ from 'jquery';
 import { Checkbox, Input } from "./common/form";
 import { Link } from "react-router-dom";
+import _ from "lodash";
 
 class FirmList extends Component {
 	state = { 
 		firms: [], 
-		addFirmData: {fiscalCode: "", vatNumber: "", soleProprietorship: true, name: ""} 
+		addFirmData: {fiscalCode: "", vatNumber: "", soleProprietorship: true, name: ""},
+		onlyActiveFirms: true
 	};
 	columns = [
 		{ path: "name", label: "Denominazione", renderContent: (item) => <Link to={`/firm/${item.id}`}>{item.name}</Link> },
@@ -31,13 +33,18 @@ class FirmList extends Component {
 		this.setState({ firms });
 	}
 	render() {
-		const { firms } = this.state;
+		const { firms, onlyActiveFirms } = this.state;
 		const { addFirmData } = this.state;
 		const { soleProprietorship, vatNumber, name, fiscalCode } = addFirmData;
+		const filteredFirms = onlyActiveFirms ? _.filter(firms, (f) => f.services.length > 0) : firms;
 		return <>
-			<AddButton text="Aggiungi" style={{float: "right", marginRight: "20px", marginBottom: "10px"}} onClick={() => $("#addModal").modal("show")}/>
+			<div>
+				<Checkbox label={`Solo con servizi attivi (${filteredFirms.length})`} checked={onlyActiveFirms} onChange={() => this.setState({onlyActiveFirms: !onlyActiveFirms})}  />
+				<AddButton text="Aggiungi" style={{float: "right", marginRight: "20px", marginBottom: "10px"}} onClick={() => $("#addModal").modal("show")}/>
+			</div>
+			
 			<Table
-				data={firms}
+				data={filteredFirms}
 				columns={this.columns}
 				keyFields={["fiscalCode", "vatNumber"]}
 				itemsPerPage={12}
