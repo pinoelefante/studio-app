@@ -107,10 +107,11 @@ class MessageGroupView extends Component {
                         </div>
                     )}
                 </div>
-                <div className="col-2" style={{margin: "10px"}}>
+                <div className="col-6" style={{margin: "10px"}}>
                     <DeleteButton text="Rimuovi" onClick={() => this.removeMessage(message)} />
                     {message.closed ? <IconButton text="Riapri" classes="btn-warning" icon={faUnlock} onClick={() => this.unlockMessage(message)} /> : <IconButton text="Chiudi" classes="btn-warning" icon={faLock} onClick={() => this.lockMessage(message)} />}
                     {message.closed && !message.sent ? <IconButton text="Invia" classes="btn-success" icon={faPaperPlane} onClick={() => this.sendMessage(message)} /> : ""}
+                    {/*message.closed && !message.sent ? <IconButton text="Invia" classes="btn-success" icon={faPaperPlane} onClick={() => this.createWhatsappMsg(message)} text="Whatsapp" /> : ""*/}
                 </div>
             </div>
         </React.Fragment>
@@ -313,6 +314,10 @@ class MessageGroupView extends Component {
                 }
                 this.loadData(group.id);
             })
+    }
+
+    createWhatsappMsg = (message) => {
+        
     }
 }
  
